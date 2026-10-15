@@ -10,9 +10,7 @@ class Trip extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'available_seats',
-    ];
+    protected $fillable = ['available_seats'];
 
     public function countries(): BelongsToMany {
         return $this->belongsToMany(Country::class);

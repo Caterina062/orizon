@@ -5,33 +5,50 @@ namespace Tests\Feature;
 use App\Models\Country;
 use App\Models\Trip;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class TripApiTest extends TestCase
 {
-    use RefreshDatabase; 
+    use RefreshDatabase;
 
-    public function test_can_create_a_trip_with_countries(): void{
+    public function test_can_create_a_trip_with_countries(): void
+    {
         $countries = Country::factory()->count(2)->create();
 
         $this->postJson('/api/trips', [
             'available_seats' => 8,
             'country_ids'     => $countries->pluck('id')->all(),
         ])
-        ->assertCreated()
-        ->assertJsonPath('data.available_seats', 8)
-        ->assertJsonCount(2, 'data.countries');
+            ->assertCreated()
+            ->assertJsonPath('data.available_seats', 8)
+            ->assertJsonCount(2, 'data.countries');
     }
 
-    public function test_trip_requires_at_least_one_country(): void{
-        $this->postJson('/api/trips', ['available_seats' => 5, 'country_ids' =>[]])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('country_ids.0'); 
+    public function test_trip_requires_at_least_one_country(): void
+    {
+        $this->postJson('/api/trips', ['available_seats' => 5, 'country_ids' => []])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('country_ids');
     }
 
-    public function test_can_list_trips(): void{
-        
+    public function test_trip_rejects_unknown_countries(): void
+    {
+        $this->postJson('/api/trips', ['available_seats' => 5, 'country_ids' => [999]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('country_ids.0');
+    }
+
+    public function test_seats_must_be_a_non_negative_integer(): void
+    {
+        $country = Country::factory()->create();
+
+        $this->postJson('/api/trips', ['available_seats' => -1, 'country_ids' => [$country->id]])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('available_seats');
+    }
+
+    public function test_can_list_trips(): void
+    {
         Trip::factory()->count(3)->create();
 
         $this->getJson('/api/trips')
@@ -39,7 +56,8 @@ class TripApiTest extends TestCase
             ->assertJsonCount(3, 'data');
     }
 
-    public function test_can_filter_trips_by_country(): void {
+    public function test_can_filter_trips_by_country(): void
+    {
         $japan = Country::factory()->create();
         $peru = Country::factory()->create();
 
@@ -51,7 +69,7 @@ class TripApiTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
-     public function test_can_filter_trips_by_minimum_seats(): void
+    public function test_can_filter_trips_by_minimum_seats(): void
     {
         Trip::factory()->create(['available_seats' => 2]);
         Trip::factory()->create(['available_seats' => 10]);

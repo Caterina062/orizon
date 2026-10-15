@@ -41,7 +41,7 @@ class TripController extends Controller
     public function store(StoreTripRequest $request): TripResource
     {
         $trip  = Trip::create($request->safe()->only('available_seats'));
-        $trip->counties()->sync($request->validated('country_ids'));
+        $trip->countries()->sync($request->validated('country_ids'));
 
         return new TripResource($trip->load('countries'));
     }
@@ -57,9 +57,9 @@ class TripController extends Controller
      */
     public function update(UpdateTripRequest $request, Trip $trip): TripResource
     {
-        $trip->update($request->safe()->only('validate_seats'));
+       $trip->update($request->safe()->only('available_seats'));
         if ($request->has('country_ids')) {
-            $trip->countries()->synnc($request->validated('country_ids'));
+            $trip->countries()->sync($request->validated('country_ids'));
         }
 
         return new TripResource($trip->load('countries'));
