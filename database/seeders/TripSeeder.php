@@ -11,7 +11,7 @@ class TripSeeder extends Seeder
 {
     public function run(): void
     {
-        $countryIds = Country::puck('id');
+        $countryIds = Country::pluck('id');
 
         Trip::factory()
         ->count(12)

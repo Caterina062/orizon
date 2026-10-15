@@ -14,7 +14,7 @@ class Country extends Model
         'name'
     ];
 
-    public function triès(): BelongsToMany{
+    public function trips(): BelongsToMany{
         return $this->belongsToMany(Trip::class);
     }
 }
