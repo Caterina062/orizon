@@ -10,7 +10,7 @@ use App\Models\Country;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 
-class CountryContropper extends Controller
+class CountryController extends Controller
 {
     public function index()
     {
